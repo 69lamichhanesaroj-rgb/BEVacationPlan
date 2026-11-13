@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Service\Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NSwag.AspNetCore" Version="14.8.0" />
+  </ItemGroup>
+
 </Project>
