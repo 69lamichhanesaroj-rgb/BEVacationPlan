@@ -9,7 +9,10 @@
     "start": "NODE_ENV=production bun src/index.ts"
   },
   "dependencies": {
+    "@fontsource/fira-sans": "^5.3.0",
+    "@fontsource/poppins": "^5.3.0",
     "react": "^19",
+    "react-day-picker": "^10.0.2",
     "react-dom": "^19"
   },
   "devDependencies": {

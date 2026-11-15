@@ -1,24 +1,24 @@
-import { APITester } from "./APITester";
 import "./index.css";
 
-import logo from "./logo.svg";
-import reactLogo from "./react.svg";
+import {LoginPage} from "@/pages/loginPage.tsx";
+import {useState} from "react";
+import type {User} from "@/Types.ts";
+import {UserDashboard} from "@/pages/UserDashboard.tsx";
 
 export function App() {
-  return (
-    <div className="app">
-      <div className="logo-container">
-        <img src={logo} alt="Bun Logo" className="logo bun-logo" />
-        <img src={reactLogo} alt="React Logo" className="logo react-logo" />
-      </div>
-
-      <h1>Bun + React</h1>
-      <p>
-        Edit <code>src/App.tsx</code> and save to test HMR
-      </p>
-      <APITester />
-    </div>
-  );
+    const [user, setUser] = useState <User | null>(null);
+    
+    if (user == null) return <LoginPage onLogin={setUser} />;
+    
+    if (user.role == 'employee') return <UserDashboard me={user} onLogout={() => {setUser(null);}} />
+    else return (
+        <main>
+            <div style={{textAlign: 'center'}}>
+                <h1>Admin and accountant dashboard is not implemented yet</h1>
+                <input type="button" value="Logout" onClick={() => {setUser(null);}} />
+            </div>
+        </main>
+    )
 }
 
 export default App;
