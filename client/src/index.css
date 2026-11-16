@@ -1,6 +1,6 @@
 @import "react-day-picker/style.css";
 
-/* ------------------------------- Design tokens ------------------------------ */
+/* Design tokens */
 
 :root {
   --bg: #fffaf0;
@@ -24,7 +24,7 @@
   --transition: 0.2s ease;
 }
 
-/* ----------------------------------- Base ---------------------------------- */
+/* Base */
 
 body {
   min-height: 100vh;
@@ -55,7 +55,7 @@ button {
   cursor: pointer;
 }
 
-/* --------------------------------- Utilities ------------------------------- */
+/* Utilities */
 
 .hint {
   color: var(--muted);
@@ -72,7 +72,7 @@ button {
   text-transform: capitalize;
 }
 
-/* ---------------------------------- Buttons -------------------------------- */
+/* Buttons */
 
 .btn {
   display: inline-flex;
@@ -130,7 +130,7 @@ button {
   color: var(--accent);
 }
 
-/* ------------------------------- Shared surfaces --------------------------- */
+/* Shared surfaces */
 
 .card,
 .calendar-section,
@@ -140,7 +140,7 @@ button {
   box-shadow: var(--shadow);
 }
 
-/* ---------------------------------- Top bar -------------------------------- */
+/* Top bar */
 
 .topbar {
   display: flex;
@@ -193,7 +193,7 @@ button {
   font-size: 14px;
 }
 
-/* ---------------------------------- Login ---------------------------------- */
+/* Login */
 
 .login {
   width: 500px;
@@ -256,7 +256,7 @@ button {
   font-size: 16px;
 }
 
-/* ---------------------------------- Cards ---------------------------------- */
+/* Cards */
 
 .cards {
   display: grid;
@@ -295,7 +295,7 @@ button {
   line-height: 1.5;
 }
 
-/* --------------------------------- Calendar -------------------------------- */
+/* Calendar */
 
 .calendar-section {
   width: 100%;
@@ -497,7 +497,7 @@ button {
   background: var(--holiday);
 }
 
-/* ---------------------------------- Table ---------------------------------- */
+/* Table */
 
 .table-wrap {
   overflow-x: auto;
@@ -538,7 +538,7 @@ button {
   background: var(--surface-hover);
 }
 
-/* ---------------------------------- Modal ---------------------------------- */
+/* Modal */
 
 .modal {
   position: fixed;
@@ -622,7 +622,7 @@ button {
   height: 42px;
 }
 
-/* --------------------------------- Responsive ------------------------------ */
+/* Responsive */
 
 @media (max-width: 700px) {
   main {

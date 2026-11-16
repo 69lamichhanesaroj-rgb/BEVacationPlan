@@ -12,7 +12,6 @@ function pad(n: number): string {
   return String(n).padStart(2, "0");
 }
 
-/** Format a local date as "YYYY-MM-DD" (avoids the UTC shift of toISOString). */
 function toIso(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
@@ -21,7 +20,6 @@ function startOfMonth(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), 1);
 }
 
-/** Day button with a small marker dot for approved / pending requests. */
 function CalendarDay({ day: _day, children, modifiers, ...props }: DayButtonProps) {
   const marker = modifiers.approved ? "approved" : modifiers.pending ? "pending" : null;
 

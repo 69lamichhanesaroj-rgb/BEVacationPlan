@@ -39,8 +39,6 @@ export function UserDashboard({ me, onLogout }: Props) {
   );
 }
 
-/* --------------------------------- Dashboard -------------------------------- */
-
 function BalanceCards({ balances }: { balances: Balance[] }) {
   return (
     <div className="cards">
@@ -56,8 +54,6 @@ function BalanceCards({ balances }: { balances: Balance[] }) {
     </div>
   );
 }
-
-/* --------------------------------- Requests --------------------------------- */
 
 function RequestsTable({ requests, onReport }: { requests: HolidayRequest[]; onReport: (r: HolidayRequest) => void }) {
   return (
