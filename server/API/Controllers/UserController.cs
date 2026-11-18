@@ -8,7 +8,7 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = RoleNames.Accountant)]
+[Authorize(Roles = RoleNames.SystemOwner)]
 public class UserController(UserService userService, RoleService roleService) : ControllerBase
 {
     private int ActorId => int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) // This is the ID of the user making the request, extracted from the JWT token.
@@ -29,7 +29,7 @@ public class UserController(UserService userService, RoleService roleService) : 
 
         try
         {
-            userService.CreateUser(request.Username, request.RoleId, request.Password);
+            userService.CreateUser(request.Email, request.RoleId, request.Password);
             return NoContent(); // 204 No Content is a standard response for a successful POST that doesn’t return any data.
         }
         catch (InvalidOperationException ex)
@@ -52,7 +52,7 @@ public class UserController(UserService userService, RoleService roleService) : 
 
         try
         {
-            userService.UpdateUser(id, request.Username, request.RoleId, request.Password);
+            userService.UpdateUser(id, request.Email, request.RoleId, request.Password);
             return NoContent();
         }
         catch (InvalidOperationException ex)

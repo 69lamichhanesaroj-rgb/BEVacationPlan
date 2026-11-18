@@ -73,8 +73,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AppDataConnection>();
     db.CreateTable<Role>(statementHeader:"CREATE TABLE IF NOT EXISTS {0}");
     db.CreateTable<User>(statementHeader:"CREATE TABLE IF NOT EXISTS {0}");
-    db.Execute("Create Unique Index IF NOT EXISTS IX_Users_Username ON Users (Username)");
-    scope.ServiceProvider.GetRequiredService<SeedRole>().SeedRoles();
+    db.Execute("CREATE UNIQUE INDEX IF NOT EXISTS IX_Users_Email ON Users (Email)");    scope.ServiceProvider.GetRequiredService<SeedRole>().SeedRoles();
     scope.ServiceProvider.GetRequiredService<SeedUser>().SeedUsers();
 }
 

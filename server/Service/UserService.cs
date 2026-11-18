@@ -11,7 +11,7 @@ public class UserService(AppDataConnection db, HashingPassword hp)
     {
         return (from u in db.Users
                 join r in db.Roles on u.RoleId equals r.Id
-                select new UserDto(u.Id, u.Username, r.RoleName)).ToList();
+                select new UserDto(u.Id, u.Email, r.RoleName)).ToList();
     }
 
     public UserDto? GetUser(int id)
@@ -19,34 +19,36 @@ public class UserService(AppDataConnection db, HashingPassword hp)
         return (from u in db.Users
                 join r in db.Roles on u.RoleId equals r.Id
                 where u.Id == id
-                select new UserDto(u.Id, u.Username, r.RoleName)).SingleOrDefault();
+                select new UserDto(u.Id, u.Email, r.RoleName)).SingleOrDefault();
     }
 
-    public void CreateUser(string username, int roleId, string password)
+    public void CreateUser(string email, int roleId, string password)
     {
-        if (db.Users.Any(u => u.Username == username))
-            throw new InvalidOperationException("Username already exists.");
+        email = email.Trim().ToLowerInvariant();
+        if (db.Users.Any(u => u.Email == email))
+            throw new InvalidOperationException("Email already exists.");
 
         var result = hp.HashAndSaltPassword(password);
 
         db.Insert(new User
         {
-            Username = username,
+            Email = email,
             RoleId = roleId,
             PasswordHash = result.Hash,
             PasswordSalt = result.Salt
         });
     }
 
-    public void UpdateUser(int id, string username, int roleId, string? password)
+    public void UpdateUser(int id, string email, int roleId, string? password)
     {
         var user = db.Users.SingleOrDefault(u => u.Id == id)
                    ?? throw new InvalidOperationException("User not found.");
 
-        if (db.Users.Any(u => u.Username == username && u.Id != id)) //u.Id != id.  Without it, saving a user with their own unchanged username would count as “already exists” because their own row matches
-            throw new InvalidOperationException("Username already exists.");
+        email = email.Trim().ToLowerInvariant();
+        if (db.Users.Any(u => u.Email == email && u.Id != id))
+            throw new InvalidOperationException("Email already exists.");
 
-        user.Username = username;
+        user.Email = email;
         user.RoleId = roleId;
 
         if (!string.IsNullOrEmpty(password))

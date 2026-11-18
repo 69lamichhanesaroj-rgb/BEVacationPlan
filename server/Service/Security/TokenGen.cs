@@ -13,7 +13,7 @@ public class TokenGen(JwtOptions options)
         var claims = new List<Claim> //Claims are the facts inside the token. We store the user’s id, name and role.
         { //Never put the password or hash in a token. Anyone can decode a token and read it
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new(ClaimTypes.Name, user.Username),
+            new(ClaimTypes.Name, user.Email),
             new(ClaimTypes.Role, roleName),
         };
 

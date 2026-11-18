@@ -7,8 +7,8 @@ public class User
     [PrimaryKey, Identity]
     public int Id { get; set; }
 
-    [Column(Name = "Username"), NotNull]
-    public string Username { get; set; }= string.Empty;
+    [Column(Name = "Email"), NotNull]
+    public string Email { get; set; }= string.Empty;
 
     [Column(Name = "PasswordHash"), NotNull]
     public byte[] PasswordHash { get; set; } = Array.Empty<byte>();
