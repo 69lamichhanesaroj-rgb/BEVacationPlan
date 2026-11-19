@@ -31,7 +31,6 @@ public class SeedUser(AppDataConnection db, HashingPassword hp)
     public void SeedUsers()
     {
         Create("owner@businessesbjerg.com", RoleNames.SystemOwner, "owner123");
-        Create("accountant@businessesbjerg.com", RoleNames.Accountant, "accountant123");
-        Create("employee@businessesbjerg.com", RoleNames.Employee, "employee123");
+        Create("accountant@businessesbjerg.com", RoleNames.Accountant, "accountant123"); 
     }
 }

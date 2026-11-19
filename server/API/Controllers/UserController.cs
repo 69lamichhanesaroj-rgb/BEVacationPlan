@@ -24,8 +24,11 @@ public class UserController(UserService userService, RoleService roleService) : 
     [HttpPost]
     public IActionResult CreateUser([FromBody] CreateUserRequest request)
     {
-        if (roleService.GetRole(request.RoleId) is null)
+        var role = roleService.GetRole(request.RoleId);
+        if (role is null)
             return BadRequest(new { message = "Invalid role ID" });
+        if(role.RoleName == RoleNames.Employee)
+            return BadRequest(new { message = "Cannot create an employee user through this endpoint. Use the employee creation endpoint instead." });
 
         try
         {

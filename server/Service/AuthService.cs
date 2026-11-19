@@ -17,6 +17,10 @@ public class AuthService(AppDataConnection db, HashingPassword hp, TokenGen tg)
 
         if (!hp.VerifyPassword(password, user.PasswordHash, user.PasswordSalt))
             return null;
+        
+        var employee = db.Employees.SingleOrDefault(e => e.UserId == user.Id);
+        if(employee?.EndDate is {} endDate && endDate < DateOnly.FromDateTime(DateTime.Today))
+            return null;
 
         var role = db.Roles.SingleOrDefault(r => r.Id == user.RoleId);
         if (role is null)

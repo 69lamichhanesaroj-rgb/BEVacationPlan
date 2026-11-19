@@ -22,15 +22,31 @@ public class UserService(AppDataConnection db, HashingPassword hp)
                 select new UserDto(u.Id, u.Email, r.RoleName)).SingleOrDefault();
     }
 
-    public void CreateUser(string email, int roleId, string password)
+    // NEW (was missing from Step 7): only ONE accountant and ONE system owner may exist.
+    // exceptUserId = the user we are saving, so the current holder can keep their own role.
+    private void EnsureRoleIsFree(int roleId, int exceptUserId)
+    {
+        var role = db.Roles.Single(r => r.Id == roleId);
+        if (role.RoleName == RoleNames.Employee)
+            return;
+
+        if (db.Users.Any(u => u.RoleId == roleId && u.Id != exceptUserId))
+            throw new InvalidOperationException($"There can only be one {role.RoleName}.");
+    }
+
+    // FIX: returns the new user's id (int instead of void). EmployeeService needs it.
+    public int CreateUser(string email, int roleId, string password)
     {
         email = email.Trim().ToLowerInvariant();
         if (db.Users.Any(u => u.Email == email))
             throw new InvalidOperationException("Email already exists.");
 
+        EnsureRoleIsFree(roleId, 0);   // 0 = nobody to ignore, ids start at 1
+
         var result = hp.HashAndSaltPassword(password);
 
-        db.Insert(new User
+        // InsertWithInt32Identity = insert the row AND give back the id the database assigned
+        return db.InsertWithInt32Identity(new User
         {
             Email = email,
             RoleId = roleId,
@@ -47,6 +63,8 @@ public class UserService(AppDataConnection db, HashingPassword hp)
         email = email.Trim().ToLowerInvariant();
         if (db.Users.Any(u => u.Email == email && u.Id != id))
             throw new InvalidOperationException("Email already exists.");
+
+        EnsureRoleIsFree(roleId, id);
 
         user.Email = email;
         user.RoleId = roleId;
@@ -65,6 +83,16 @@ public class UserService(AppDataConnection db, HashingPassword hp)
     {
         var user = db.Users.SingleOrDefault(u => u.Id == id)
                    ?? throw new InvalidOperationException("User not found.");
+
+        if (db.Employees.Any(e => e.UserId == id))
+        {
+            throw new InvalidOperationException("Deactivate the employee instead of deleting the user, history must be kept.");
+        }
+
+        // NEW: the one accountant / system owner must never disappear.
+        var role = db.Roles.Single(r => r.Id == user.RoleId);
+        if (role.RoleName != RoleNames.Employee)
+            throw new InvalidOperationException($"The {role.RoleName} account cannot be deleted. Change its email instead.");
 
         db.Delete(user);
     }
