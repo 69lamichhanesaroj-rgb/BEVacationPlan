@@ -10,10 +10,10 @@ public class EmployeeService(AppDataConnection db, UserService userService)
 {
     public int CreateEmployee(CreateEmployeeRequest request)
     {
-        if (request.HireDate == default)
-            throw new ArgumentException("Hire date must be provided.");   // FIX: bad input = ArgumentException (controller -> 400)
+        if (request.HireDate == default)  // default means missing
+            throw new ArgumentException("Hire date must be provided.");   
 
-        var schedule = ParseSchedule(request.Days); // validate BEFORE touching the database
+        var schedule = ParseSchedule(request.Days); // check schedule and validate BEFORE touching the database
 
         using var transaction = db.BeginTransaction(); // transaction means all or nothing, if anything fails, the database is rolled back to its previous state.(like a bank transfer)
 
@@ -21,6 +21,8 @@ public class EmployeeService(AppDataConnection db, UserService userService)
 
         var userId = userService.CreateUser(request.Email, employeeRole.Id, request.Password); //create the login with hashed password and returns a new  user id
 
+        // Create the EMPLOYEE PROFILE linked to that login (UserId).
+        // InsertWithInt32Identity = insert the row AND give back the id the database assigned.
         var employeeId = db.InsertWithInt32Identity(new Employee
         {
             UserId = userId,
@@ -30,6 +32,8 @@ public class EmployeeService(AppDataConnection db, UserService userService)
 
         // The first schedule starts on the Monday of the week of the hire date, or on the hire date itself if it is a Monday.
         var validFrom = MondayOnOrBefore(request.HireDate);
+        
+        // One database row per working weekday. A day off gets no row at all.
         foreach (var day in schedule)
         {
             db.Insert(new WorkScheduleDay
@@ -49,6 +53,7 @@ public class EmployeeService(AppDataConnection db, UserService userService)
     public List<EmployeeDto> GetEmployees()
     {
         var today = DateOnly.FromDateTime(DateTime.Today);
+        // This builds a SQL JOIN: for every employee also fetch the login's email.
         var employees = (from e in db.Employees
                          join u in db.Users on e.UserId equals u.Id
                          select new { e.Id, e.UserId, u.Email, e.FullName, e.HireDate, e.EndDate }).ToList();
@@ -56,8 +61,7 @@ public class EmployeeService(AppDataConnection db, UserService userService)
         // Schedules are tiny (5 rows per version), so we load them and do the date logic in C#.
         var schedulesByEmployee = db.WorkScheduleDays.ToList().ToLookup(x => x.EmployeeId);
 
-        // FIX 1: WeeklyHoursOn is a method of THIS class, not of the employee object: no "e." in front.
-        // FIX 2: EmployeeDto has 7 values, e.EndDate was missing.
+       // Return a list of EmployeeDto, which includes the weekly hours calculated from the schedule.
         return employees
             .Select(e => new EmployeeDto(e.Id, e.UserId, e.Email, e.FullName, e.HireDate, e.EndDate,
                 WeeklyHoursOn(schedulesByEmployee[e.Id].ToList(), today)))
@@ -66,13 +70,14 @@ public class EmployeeService(AppDataConnection db, UserService userService)
 
     public void DeactivateEmployee(int employeeId, DateOnly endDate)
     {
+        // SingleOrDefault gives null when nothing is found.
         var employee = db.Employees.SingleOrDefault(e => e.Id == employeeId)
-                       ?? throw new KeyNotFoundException("Employee not found.");        // FIX: the controller catches KeyNotFoundException -> 404
+                       ?? throw new KeyNotFoundException("Employee not found.");        
 
-        if (employee.EndDate is not null)      // works now that Employee.EndDate is DateOnly?
+        if (employee.EndDate is not null)      
             throw new InvalidOperationException("Employee is already deactivated.");
         if (endDate < employee.HireDate)
-            throw new ArgumentException("End date cannot be before hire date.");        // FIX: bad input -> 400
+            throw new ArgumentException("End date cannot be before hire date.");       
 
         employee.EndDate = endDate;
         db.Update(employee);
@@ -80,7 +85,7 @@ public class EmployeeService(AppDataConnection db, UserService userService)
 
     // Helper methods
 
-    private static List<(int Weekday, int Start, int End)> ParseSchedule(List<WorkDayDto> days)   // FIX: DTO was misspelled WorkDAyDto
+    private static List<(int Weekday, int Start, int End)> ParseSchedule(List<WorkDayDto> days)   
     {
         var result = new List<(int Weekday, int Start, int End)>();
         var seen = new HashSet<int>(); // to check for duplicates,HashSet is a collection that contains no duplicate elements, and it provides fast lookup for checking if an element is already present in the set.
@@ -117,7 +122,7 @@ public class EmployeeService(AppDataConnection db, UserService userService)
     // TryParseExact is used to parse the time string in a specific format, and it returns a boolean indicating whether the parsing was successful or not.
     // If the parsing fails, an ArgumentException is thrown with a message indicating the expected format.
     private static int ToMinutes(string text)
-    {   // FIX: the opening brace was missing
+    {   
         if (!TimeOnly.TryParseExact(text, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var time))
             throw new ArgumentException($"Invalid time format: {text}. Expected HH:mm.");
         return time.Hour * 60 + time.Minute;
@@ -127,7 +132,7 @@ public class EmployeeService(AppDataConnection db, UserService userService)
     {
         // (n+6) % 7 means that Monday is 0, Tuesday is 1, ..., Sunday is 6. So if today is Wednesday (3), then daysSinceMonday = (3+6)%7 = 2, and we subtract 2 days to get back to Monday.
         var daysSinceMonday = ((int)date.DayOfWeek + 6) % 7;
-        return date.AddDays(-daysSinceMonday);   // FIX: the semicolon was missing. Subtract that many days to get back to Monday
+        return date.AddDays(-daysSinceMonday);   //  Subtract that many days to get back to Monday
     }
 
     private static decimal WeeklyHoursOn(List<WorkScheduleDay> rows, DateOnly date)

@@ -33,7 +33,7 @@ public class UserController(UserService userService, RoleService roleService) : 
         try
         {
             userService.CreateUser(request.Email, request.RoleId, request.Password);
-            return NoContent(); // 204 No Content is a standard response for a successful POST that doesn’t return any data.
+            return NoContent(); 
         }
         catch (InvalidOperationException ex)
         {
