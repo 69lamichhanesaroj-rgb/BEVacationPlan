@@ -13,10 +13,10 @@ public class AuthController(AuthService authService) : ControllerBase
     [AllowAnonymous] //login must be reachable without a token, since we don’t have one yet.
     public ActionResult<LoginResponse> Login([FromBody] LoginRequest request)
     {
-        var result = authService.Login(request.Username, request.Password);
+        var result = authService.Login(request.Email, request.Password);
 
         return result is null
-            ? Unauthorized(new { message = "Invalid username or password" }) //Unauthorized returns 401 Unauthorized, which is the correct response for a failed login. We don’t say “username not found” or “password wrong” because that would give away information to an attacker.
+            ? Unauthorized(new { message = "Invalid email or password" }) //Unauthorized returns 401 Unauthorized, which is the correct response for a failed login. We don’t say “email not found” or “password wrong” because that would give away information to an attacker.
             : Ok(result);
     }
 }

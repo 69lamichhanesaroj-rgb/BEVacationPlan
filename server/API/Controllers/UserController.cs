@@ -8,7 +8,7 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = RoleNames.Accountant)]
+[Authorize(Roles = RoleNames.SystemOwner)]
 public class UserController(UserService userService, RoleService roleService) : ControllerBase
 {
     private int ActorId => int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) // This is the ID of the user making the request, extracted from the JWT token.
@@ -24,13 +24,16 @@ public class UserController(UserService userService, RoleService roleService) : 
     [HttpPost]
     public IActionResult CreateUser([FromBody] CreateUserRequest request)
     {
-        if (roleService.GetRole(request.RoleId) is null)
+        var role = roleService.GetRole(request.RoleId);
+        if (role is null)
             return BadRequest(new { message = "Invalid role ID" });
+        if(role.RoleName == RoleNames.Employee)
+            return BadRequest(new { message = "Cannot create an employee user through this endpoint. Use the employee creation endpoint instead." });
 
         try
         {
-            userService.CreateUser(request.Username, request.RoleId, request.Password);
-            return NoContent(); // 204 No Content is a standard response for a successful POST that doesn’t return any data.
+            userService.CreateUser(request.Email, request.RoleId, request.Password);
+            return NoContent(); 
         }
         catch (InvalidOperationException ex)
         {
@@ -52,7 +55,7 @@ public class UserController(UserService userService, RoleService roleService) : 
 
         try
         {
-            userService.UpdateUser(id, request.Username, request.RoleId, request.Password);
+            userService.UpdateUser(id, request.Email, request.RoleId, request.Password);
             return NoContent();
         }
         catch (InvalidOperationException ex)

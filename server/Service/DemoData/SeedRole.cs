@@ -24,5 +24,6 @@ public class SeedRole(AppDataConnection db)
     {
         Create(RoleNames.Employee);
         Create(RoleNames.Accountant);
+        Create(RoleNames.SystemOwner);
     }
 }

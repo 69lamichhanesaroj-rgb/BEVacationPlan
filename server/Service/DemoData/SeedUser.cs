@@ -7,9 +7,9 @@ namespace Service.DemoData;
 
 public class SeedUser(AppDataConnection db, HashingPassword hp)
 {
-    private void Create(string username, string roleName, string password)
+    private void Create(string email, string roleName, string password)
     {
-        if (db.Users.Any(u => u.Username == username))
+        if (db.Users.Any(u => u.Email == email))
         {
             return;
         }
@@ -21,7 +21,7 @@ public class SeedUser(AppDataConnection db, HashingPassword hp)
 
         db.Insert(new User
         {
-            Username = username,
+            Email = email,
             RoleId = role.Id,
             PasswordHash = hash.Hash,
             PasswordSalt = hash.Salt
@@ -30,7 +30,7 @@ public class SeedUser(AppDataConnection db, HashingPassword hp)
 
     public void SeedUsers()
     {
-        Create("accountant", RoleNames.Accountant, "accountant123");
-        Create("employee", RoleNames.Employee, "employee123");
+        Create("owner@businessesbjerg.com", RoleNames.SystemOwner, "owner123");
+        Create("accountant@businessesbjerg.com", RoleNames.Accountant, "accountant123"); 
     }
 }

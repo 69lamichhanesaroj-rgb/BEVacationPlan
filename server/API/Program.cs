@@ -38,6 +38,7 @@ builder.Services.AddSingleton<TokenGen>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<RoleService>();
+builder.Services.AddScoped<EmployeeService>();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -73,7 +74,10 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AppDataConnection>();
     db.CreateTable<Role>(statementHeader:"CREATE TABLE IF NOT EXISTS {0}");
     db.CreateTable<User>(statementHeader:"CREATE TABLE IF NOT EXISTS {0}");
-    db.Execute("Create Unique Index IF NOT EXISTS IX_Users_Username ON Users (Username)");
+    db.CreateTable<Employee>(statementHeader:"CREATE TABLE IF NOT EXISTS {0}");
+    db.CreateTable<WorkScheduleDay>(statementHeader:"CREATE TABLE IF NOT EXISTS {0}");
+    db.Execute("CREATE UNIQUE INDEX IF NOT EXISTS IX_Employee_UserId ON Employees (UserId)");
+    db.Execute("CREATE UNIQUE INDEX IF NOT EXISTS IX_WorkScheduleDay_Version ON WorkScheduleDays (EmployeeId, ValidFrom, Weekday)");
     scope.ServiceProvider.GetRequiredService<SeedRole>().SeedRoles();
     scope.ServiceProvider.GetRequiredService<SeedUser>().SeedUsers();
 }

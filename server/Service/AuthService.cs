@@ -8,19 +8,24 @@ namespace Service;
 //The return type LoginResponse? (with the question mark) means “a response or nothing”.
 public class AuthService(AppDataConnection db, HashingPassword hp, TokenGen tg)
 {
-    public LoginResponse? Login(string username, string password)
+    public LoginResponse? Login(string email, string password)
     {
-        var user = db.Users.SingleOrDefault(u => u.Username == username);
+        email = email.Trim().ToLowerInvariant();
+        var user = db.Users.SingleOrDefault(u => u.Email == email);
         if (user is null)
             return null;
 
         if (!hp.VerifyPassword(password, user.PasswordHash, user.PasswordSalt))
+            return null;
+        
+        var employee = db.Employees.SingleOrDefault(e => e.UserId == user.Id);
+        if(employee?.EndDate is {} endDate && endDate < DateOnly.FromDateTime(DateTime.Today))
             return null;
 
         var role = db.Roles.SingleOrDefault(r => r.Id == user.RoleId);
         if (role is null)
             return null;
 
-        return new LoginResponse(tg.CreateToken(user, role.RoleName), user.Id, user.Username, role.RoleName);
+        return new LoginResponse(tg.CreateToken(user, role.RoleName), user.Id, user.Email, role.RoleName);
     }
 }
